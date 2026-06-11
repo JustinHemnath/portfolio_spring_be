@@ -13,6 +13,10 @@ public class UserService {
     @Autowired
     public UserRepository userRepository;
 
+    UserService(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
     public List<User> getUsers() {
         return userRepository.findAll();
     }

@@ -70,7 +70,10 @@ public class UserController {
                             new UserResponseDto("registered", metadata));
                 }
             } else {
+
                 metadata.put("users", users);
+                // metadata.put("conversations", conversations)
+
                 return ResponseEntity.ok().body(
                         new UserResponseDto("validated", metadata));
             }
