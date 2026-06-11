@@ -1,6 +1,9 @@
 package com.example.practicespringboot.Practice.Springboot.user;
 
 import com.example.practicespringboot.Practice.Springboot.dto.UserResponseDto;
+import com.example.practicespringboot.Practice.Springboot.mapper.MessagesUtil;
+import com.example.practicespringboot.Practice.Springboot.messages.MessageService;
+import com.example.practicespringboot.Practice.Springboot.messages.Messages;
 import com.example.practicespringboot.Practice.Springboot.user.UserService;
 
 import java.util.HashMap;
@@ -14,6 +17,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.server.ResponseStatusException;
@@ -23,11 +27,12 @@ import org.springframework.web.bind.annotation.RequestBody;
 @Controller
 public class UserController {
 
-    @Autowired
     private UserService userService;
+    private final MessageService messageService;
 
-    UserController(UserService userService) {
+    UserController(UserService userService, MessageService messageService) {
         this.userService = userService;
+        this.messageService = messageService;
     }
 
     @GetMapping("/users")
@@ -35,9 +40,9 @@ public class UserController {
         return ResponseEntity.ok(userService.getUsers());
     }
 
-    @PostMapping("/validateUser")
+    @PostMapping("/users/validateUser")
     public ResponseEntity<?> postMethodName(@RequestBody PostUserDto postUserDto) {
-        if (postUserDto == null || postUserDto.name() == null || postUserDto.email() == null) {
+        if (postUserDto == null || postUserDto.getName() == null || postUserDto.getEmail() == null) {
             throw new ResponseStatusException(
                     HttpStatus.BAD_REQUEST,
                     "user object with name and email props is required");
@@ -47,15 +52,12 @@ public class UserController {
             List<Map<String, String>> users = userService.getUsers().stream()
                     .map(u -> Map.of("email", u.email, "name", u.name))
                     .collect(Collectors.toList());
-            boolean userExists = users.stream().anyMatch(u -> u.get("email").equals(postUserDto.email()));
-
-            System.out.println(users);
-            System.out.println(userExists);
+            boolean userExists = users.stream().anyMatch(u -> u.get("email").equals(postUserDto.getEmail()));
 
             if (!userExists) {
                 User newUser = new User();
-                newUser.setEmail(postUserDto.email());
-                newUser.setName(postUserDto.name());
+                newUser.setEmail(postUserDto.getEmail());
+                newUser.setName(postUserDto.getName());
 
                 User userCreated = userService.saveUser(newUser);
 
@@ -64,15 +66,20 @@ public class UserController {
                             HttpStatus.INTERNAL_SERVER_ERROR,
                             "Creation of user failed");
                 } else {
-                    users.add(Map.of("email", postUserDto.email(), "name", postUserDto.name()));
+                    users.add(Map.of("email", postUserDto.getEmail(), "name", postUserDto.getName()));
                     metadata.put("users", users);
                     return ResponseEntity.ok().body(
                             new UserResponseDto("registered", metadata));
                 }
             } else {
 
+                List<Messages> messages = messageService.getBySenderOrReceiver(
+                        postUserDto.getEmail(),
+                        postUserDto.getEmail());
+                Object conversations = MessagesUtil.getModelledConversations(messages,
+                        postUserDto.getEmail());
+                metadata.put("conversations", conversations);
                 metadata.put("users", users);
-                // metadata.put("conversations", conversations)
 
                 return ResponseEntity.ok().body(
                         new UserResponseDto("validated", metadata));

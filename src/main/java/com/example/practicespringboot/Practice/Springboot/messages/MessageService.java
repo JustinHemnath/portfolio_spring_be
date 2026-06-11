@@ -15,4 +15,8 @@ public class MessageService {
         return messageRepository.findAll();
     }
 
+    public List<Messages> getBySenderOrReceiver(String sender, String receiver) {
+        return messageRepository.getBySenderOrReceiver(sender, receiver);
+    }
+
 }

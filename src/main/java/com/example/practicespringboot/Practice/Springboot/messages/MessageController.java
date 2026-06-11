@@ -9,9 +9,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 
 @Controller
 public class MessageController {
-
-    @Autowired
-    public MessageService messageService;
+    public final MessageService messageService;
 
     MessageController(MessageService messageService) {
         this.messageService = messageService;
@@ -19,7 +17,16 @@ public class MessageController {
 
     @GetMapping("/messages")
     public ResponseEntity<List<Messages>> getAllMessages() {
+        // return ResponseEntity.ok().body(messageService.getAllMessages());
         return ResponseEntity.ok().body(messageService.getAllMessages());
+    }
+
+    @GetMapping("/messages/id")
+    public ResponseEntity<List<Messages>> getBySenderAndReceiver() {
+        // return ResponseEntity.ok().body(messageService.getAllMessages());
+        return ResponseEntity.ok().body(
+                messageService.getBySenderOrReceiver("justin.hemnath.96@gmail.com",
+                        "justin.hemnath.96@gmail.com"));
     }
 
 }
