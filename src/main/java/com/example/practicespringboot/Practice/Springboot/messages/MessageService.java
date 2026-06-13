@@ -19,4 +19,7 @@ public class MessageService {
         return messageRepository.getBySenderOrReceiver(sender, receiver);
     }
 
+    public Messages saveMessage(Messages messages) {
+        return messageRepository.saveAndFlush(messages);
+    }
 }

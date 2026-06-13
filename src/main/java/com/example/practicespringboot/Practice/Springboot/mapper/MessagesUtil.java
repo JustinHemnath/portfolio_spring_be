@@ -21,7 +21,7 @@ public class MessagesUtil {
             String otherPersonEmail;
             String otherPersonName;
 
-            if (currentUserEmail == message.sender) {
+            if (currentUserEmail.equals(message.sender)) {
                 otherPersonEmail = message.receiver;
                 otherPersonName = message.receiver_name;
             } else {

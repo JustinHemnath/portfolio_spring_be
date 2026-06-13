@@ -24,11 +24,21 @@ public class WebSocketEventListener {
                 String sessionId = accessor.getSessionId();
                 sessions.put(sessionId, sessionId);
 
-                String email = accessor.getFirstNativeHeader("email");
+                String email = null;
+                if (accessor.getUser() != null) {
+                        email = accessor.getUser().getName();
+                }
+                if (email == null) {
+                        email = accessor.getFirstNativeHeader("email");
+                }
 
-                emailToSessionId.put(email, sessionId);
-                sessionIdToEmail.put(sessionId, email);
-                System.out.println("Connected: " + email + " - " + sessionId);
+                if (email != null) {
+                        emailToSessionId.put(email, sessionId);
+                        sessionIdToEmail.put(sessionId, email);
+                        System.out.println("Connected: " + email + " - " + sessionId);
+                } else {
+                        System.out.println("Connected session has no email principal or header: " + sessionId);
+                }
         }
 
         @EventListener
